@@ -84,6 +84,7 @@ app.post("/checknamelist", (req, res) => {
 });
 
 app.get("/iduser", (req, res) => {
+  //test commit
   db.query("select * from user_info", (err, result) => {
     if (err) {
       // console.log(err, "err");
