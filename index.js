@@ -1,6 +1,8 @@
 const express = require("express");
+require('dotenv').config()
 const app = express();
 const mysql = require("mysql");
+const mysql2 = require("mysql2");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
 // const saltRounds = 10;
@@ -13,11 +15,18 @@ const gentoken = "token-Login";
 const nodemailer = require("nodemailer");
 const multer = require("multer");
 const e = require("express");
-const db = require('./db')
+// const db = require('./db')
 
 app.use(cors());
 app.use(express.json());
 
+const db = mysql2.createConnection(process.env.DATABASE_URL)
+// const db = mysql.createConnection({
+//   user: "root",
+//   host: "localhost",
+//   password: "DBEV61040626362",
+//   database: "elec_vote",
+// });
  
 app.post("/checklogin", (req, res) => {
   const idss = req.body.idss;
@@ -27,6 +36,7 @@ app.post("/checklogin", (req, res) => {
     "select * from participant where Email = ? ",
     [idss],
     (err, user) => {
+      console.log("us = ", user)
       if (user.length == 0) {
         res.send({ massage: "Failusername", Login: user.length });
       } else {
@@ -1265,7 +1275,8 @@ app.post("/sendmail", (req, res) => {
         "</b> <br></br> <b>"+
         "เริ่มเวลา : "+event_start +"น."+
         "และสิ้นสุดเวลา :"+event_end+
-         "</b> </div>", // HTML body
+         "</b> "+
+         "<b> <a href='http://localhost:3000/'> เชิญเข้ารับการเลือกตั้ง </a> </b> </div>", // HTML body
     };
     transporter.sendMail(mailOptions, function (err, info) {
       if (err) {
@@ -1321,8 +1332,8 @@ app.post("/sendmail_Edit", (req, res) => {
         " โดยจะเริ่มในวันที่ :"+date_m+
         "</b> <br></br> <b>"+
         "เริ่มเวลา : "+event_start +"น."+
-        "และสิ้นสุดเวลา :"+event_end+
-         "</b> </div>", // HTML body
+        "และสิ้นสุดเวลา :"+event_end+"</b> "+
+        "<b> <a href='http://localhost:3000/'> เชิญเข้ารับการเลือกตั้ง </a> </b> </div>", // HTML body
     };
     transporter.sendMail(mailOptions, function (err, info) {
       if (err) {
@@ -2653,18 +2664,19 @@ app.post("/Checkevent", (req, res) => {
 
   const timecheck = "2022-12-7 03:20:00";
 
-  db.query("SELECT * FROM `event_info` where status_event = 0 or status_event = 4", (err, user) => {
+  db.query("SELECT * FROM `event_info` where status_event = 0 or status_event = 4;", (err, user) => {
+    if (user == null){
+      res.send({ massage: "Don't Update" });
+    }
     if (err) {
       // console.log("Err Check Evenr = ", err);
     }
-    if (user.length != 0) {
-      // console.log("User");
+    else if (user.length != 0) { 
       for (var i = 0; i < user.length; i++) {
         date_event = user[i].Date_vote + " " + user[i].Time_end;
         end_event = user[i].Time_end;
         eventdate_end = user[i].Date_vote;
- 
-        // // console.log("User2 = ", date_event, " === ", date_time_now);
+  
 
         const date1 = new Date(date_time_now); 
         const date2 = new Date(date_event);  
@@ -3892,6 +3904,15 @@ app.post("/showVoted", (req, res) => {
 });
 
 //--------------------------------------------------------------
-app.listen("3001", jsonParser, () => {
+
+app.get('/', (req,res) => {
+  db.query('select * from user_info',
+  function(err , user , fields){ 
+      console.log(user);
+      res.send(user);
+  })
+})
+
+app.listen("3001", jsonParser, () => { 
   console.log("Server Runing 3001");
 });
