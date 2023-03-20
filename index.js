@@ -3905,13 +3905,13 @@ app.post("/showVoted", (req, res) => {
 
 //--------------------------------------------------------------
 
-app.get('/', (req,res) => {
-  db.query('select * from user_info',
-  function(err , user , fields){ 
-      console.log(user);
-      res.send(user);
-  })
-})
+// app.get('/', (req,res) => {
+//   db.query('select * from user_info',
+//   function(err , user , fields){ 
+//       console.log(user);
+//       res.send(user);
+//   })
+// })
 
 app.listen("3001", jsonParser, () => { 
   console.log("Server Runing 3001");
