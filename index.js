@@ -15,12 +15,12 @@ const gentoken = "token-Login";
 const nodemailer = require("nodemailer");
 const multer = require("multer");
 const e = require("express");
-// const db = require('./db')
+const db = require('./db')
 
 app.use(cors());
 app.use(express.json());
 
-const db = mysql2.createConnection(process.env.DATABASE_URL)
+// const db = mysql2.createConnection(process.env.DATABASE_URL)
 // const db = mysql.createConnection({
 //   user: "root",
 //   host: "localhost",
@@ -3909,7 +3909,7 @@ app.post("/showVoted", (req, res) => {
 //   db.query('select * from user_info',
 //   function(err , user , fields){ 
 //       console.log(user);
-//       res.send(user);
+//       res.send(user);ss
 //   })
 // })
 
