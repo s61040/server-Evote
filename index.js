@@ -3884,6 +3884,7 @@ app.post("/Check_hash", (req, res) => {
                 } 
               }
             );
+            // ทดลองแก้ไข git
   
           } else {
             bcrypt.compare( 
