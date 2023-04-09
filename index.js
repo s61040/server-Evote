@@ -1,12 +1,9 @@
 const express = require("express");
 require('dotenv').config()
-const app = express();  
-
-const base64Img = require("base64-img"); 
- 
+const app = express();   
+const base64Img = require("base64-img");        
 const cors = require("cors");
-const bcrypt = require("bcrypt"); 
-
+const bcrypt = require("bcrypt");  
 var saltRounds = bcrypt.genSaltSync(10);
 const bodyParser = require("body-parser");
 const jsonParser = bodyParser.json();
@@ -367,7 +364,7 @@ app.post("/login", (req, res) => {
                   } else {
                     db.query("select * from event_info where Id_event = " + id ,
                     (err, user01) => { 
-                      console.log("check.ElecStatus == ", id);
+                      // console.log("check.ElecStatus == ", id);
                       res.send({
                         message: "participant",
                         message2: user,
@@ -729,8 +726,7 @@ app.get("/img/:fileName", (req, res) => {
 app.post("/upload", (req, res) => {
   // รับข้อมูลรูปภาพ base64 ผ่าน body
   const { imagStr, fileName } = req.body;
-
-  // แปลงเป็นไฟล์รูปภาพ png โดยใช้ base64-img package
+ 
   base64Img.img(imagStr, "public/img", fileName, (err, filepath) => {
     if (err) {
       console.log(err);
@@ -2748,13 +2744,13 @@ app.post("/Vote", (req, res) => {
   const id_e = req.body.id_e;
   var phash = "";
   var count = 0;
-  var time = [];
+  var time = []; 
   var timecount = "";
   var timehash = 0;
   var a = 0;
   var b = 0;
   var c = 0; 
-
+  
   const buff = Buffer.from(vote.toString(), "utf-8");
   const base64 = buff.toString("base64"); 
   try{ 
@@ -2765,137 +2761,156 @@ app.post("/Vote", (req, res) => {
           console.log("fail1", err);
         } else {
           for (var i = 0; i < data0.length; i++) {
-            // // console.log("hash = = ", i , " = = ",data[i].hash_vote);
+            //  console.log("hash = = ", i , " = = ",data0[i].hash_vote);
             if (data0[i].hash_vote != null) {
-              timehash = +1;
+              timehash = timehash+1; 
               if (timehash == 1) {
                 c = i;
-              }
-            }
-          }
+              } 
+            } 
+          } 
           if (timehash == 0) {
-            // console.log("Nodata");
-          } else if (timehash == 1) {
-            phash = data0[c].hash_vote;
-            // console.log("P_hash = ", data0[c].hash_vote);
-          } else {
-            for (var i = 0; i < data0.length; i++) {
-              time[i] = data0[i].Time_vote;
-              // console.log("time = = ", i, "==", time[5], " = = ", time[1]);
-              if (time[i] != null) {
-                time[a] = time[i];
-                // console.log("TIME A == ", a, "== ", time[a]);
-                a++;
-              }
-              if (time[b] < time[b + i]) {
-                timecount = time[b + i];
-                // // console.log("TIME Count 1== ", b, "== ", timecount);
-                b++;
-              } else if (time[b] > time[b + i]) {
-                timecount = time[b];
-                // // console.log("TIME Count 2 == ", b, "== ", timecount);
-              }
-            }
+            Update();
+            // console.log("Nodata"); 
+          } else if (timehash == 1) { 
+            phash = data0[c].hash_vote; 
+            Update();
+          } else { 
+            // for (var i = 0; i < data0.length; i++) {
+            //   time[i] = data0[i].Time_vote; 
+            //   if (time[i] != null) {
+            //     time[a] = datevote+" "+time[i];
+            //     time2[a] = time[i];
+            //     // console.log("TIME A == ", a, "== ", time[a]);
+            //     a++;
+            //   } 
+            // }
+            // for(var i = 0 ; i <= a ; i++){
+            //   let date01 = new Date(time[b]);
+            //   let date02 = new Date(time[b + i]);
+
+            //   if (date01 < date02) {
+            //     timecount = time2[b + i];
+            //     console.log("TIME Count 1== ", b, "== ", timecount);
+            //     b++;
+            //   } else if (date01 > date02) {
+            //     timecount = time2[b];
+            //     console.log("TIME Count 2 == ", b, "== ", timecount);
+            //   }else {
+            //     console.log("else ;;; ")
+            //   }
+            // }  
+            // console.log(" ============================== > " , timehash)
             db.query(
-              "select * from participant where Time_vote = " +
-                "'" +
-                timecount +
-                "'",
-              (err, data1) => {
+              "select * from participant where c_hash = ? And Id_event = ?" ,[timehash-1 , id_e],
+              (err, data99) => { 
                 if (err) {
-                  // console.log("fail1", err);
-                } else {
-                  // // console.log("data = ", timecount, data1);
-                  phash = data1[0].hash_vote;
+                  console.log("fail1", err);
+                } else { 
+                  // console.log(data99 , " =  " ,timehash-1 , " = ", id_e)
+                  phash = data99[0].hash_vote;
+                  Update();
+                  ///  Vote Update ----------------------------------------------- 
+                  } 
                 }
+              ) 
+          }
+        }
+      }
+    );
+     
+    const Update= () =>{
+      db.query(
+        "select * from participant where Id_event = " + id_e,
+        (err, data) => {
+          if (err) {
+            // console.log("fail1", err);
+          } else { 
+            for (var i = 0; i < data.length; i++) {
+              // // console.log("hash = = ", i , " = = ",data[i].hash_vote);
+              if (data[i].hash_vote != null) {
+                count = +1;
               }
-            );
-          }
-        }
-      }
-    );
-  
-    // -----------------------------------------------------------------------
-  
-    db.query(
-      "select * from participant where Id_event = " + id_e,
-      (err, data) => {
-        if (err) {
-          // console.log("fail1", err);
-        } else {
-          for (var i = 0; i < data.length; i++) {
-            // // console.log("hash = = ", i , " = = ",data[i].hash_vote);
-            if (data[i].hash_vote != null) {
-              count = +1;
             }
-          }
-          if (data.length >= 0) {
-            if (count > 0 && phash != null) {
-              bcrypt.hash(
-                id_par + vote + phash + date + clockState,
-                saltRounds,
-                function (err, hash1) {
-                  // Set hash Mailuser
-                  db.query(
-                    "UPDATE  participant SET  Vote = ? , hash_vote  = ? , P_hash = ? , ElecStatus = '2' , " +
-                      " Date_vote = ?  , Time_vote = ? " +
-                      " WHERE  Par_id = " +
-                      id_par,
-                    [base64, hash1, phash, date, clockState],
-                    (err, user1) => {
-                      if (err) {
-                        console.log("err Vote 2 == ", err);
-                      } else {
-                        // console.log("CanVote Old");
-                        console.log("CanVote = ", vote);
-                        console.log("hash1  = ", hash1);
-                        console.log("phash = ", phash);
-                        console.log("date = ", date);
-                        console.log("clockState = ", clockState);
-                        res.send({
-                          user1,
-                          Massage: "insert1",
-                        });
+            if (data.length >= 0) { 
+              if (count > 0 && phash != null) { 
+                  // console.log("timehash == ", timehash); 
+                  // console.log("id_par = ", id_par , " = ", typeof id_par);
+                  // console.log("base64 = ", base64, " = ", typeof base64); 
+                  // console.log("Vote = ",vote , " = ", typeof vote); 
+                  // console.log("phash = ", phash, " = " ,typeof phash);
+                  // console.log("date = ", date, " = " ,typeof date);
+                  // console.log("clockState = ", clockState, " = ", typeof date);  
+                bcrypt.hash(
+                  id_par + vote + phash+date+ clockState,
+                  saltRounds,
+                  function (err, hash1) { 
+                    // Set hash Mailuser
+                    db.query(
+                      "UPDATE  participant SET  Vote = ? , hash_vote  = ? , P_hash = ? , c_hash = ?, ElecStatus = '2' , " +
+                        " Date_vote = ?  , Time_vote = ? " +
+                        " WHERE  Par_id = " +
+                        id_par,
+                      [base64, hash1, phash, timehash, date, clockState],
+                      (err, user1) => {
+                        if (err) {
+                          console.log("err Vote 2 == ", err);
+                        } else {
+                          // console.log("CanVote Old");
+                          // console.log("id_par = ", id_par);
+                          // console.log("base64 = ", base64);
+                          // console.log("Vote = ",typeof vote);
+                          // console.log("Vote = ",vote);
+                          // console.log("hash1  = ", hash1, " = ", typeof hash1);
+                          // console.log("phash = ", phash);
+                          // console.log("date = ", date);
+                          // console.log("clockState = ", clockState);
+                          res.send({
+                            user1,
+                            Massage: "insert1",
+                          });
+                        }
                       }
-                    }
-                  );
-                }
-              );
-            } else {
-              bcrypt.hash(
-                id_par + vote + 0 + date + clockState,
-                saltRounds,
-                function (err, hash1) {
-                  // Set hash Mailuser
-                  db.query(
-                    "UPDATE  participant SET  Vote = ? , hash_vote  = ? , P_hash = '0' , ElecStatus = '2', " +
-                      " Date_vote = ?  , Time_vote = ?  " +
-                      " WHERE  Par_id = " +
-                      id_par,
-                    [base64, hash1, date, clockState],
-                    (err, user2) => {
-                      if (err) {
-                        console.log("err Vote 3 == ", err);
-                      } else {
-                        // console.log("CanVote New");
-                        // console.log("idpar  New", id_par);
-                        // console.log("vote New", vote);
-                        // console.log("hash1 New", hash1);
-                        // console.log("date New", date);
-                        res.send({
-                          user2,
-                          Massage: "insert2",
-                        });
+                    );
+                  }
+                );
+              } else {   
+                bcrypt.hash(
+                  id_par + vote + 0 +date+ clockState,
+                  saltRounds,
+                  function (err, hash1) {
+                    // Set hash Mailuser
+                    db.query(
+                      "UPDATE  participant SET  Vote = ? , hash_vote  = ? , P_hash = '0' , c_hash = '0' , ElecStatus = '2', " +
+                        " Date_vote = ?  , Time_vote = ?  " +
+                        " WHERE  Par_id = " +
+                        id_par,
+                      [base64, hash1, date, clockState],
+                      (err, user2) => {
+                        if (err) {
+                          console.log("err Vote 3 == ", err);
+                        } else {
+                          // console.log("CanVote New");
+                          // console.log("idpar  New", id_par);
+                          // console.log("vote New", vote);
+                          // console.log("hash1 New", hash1);
+                          // console.log("date New", date);
+                          res.send({
+                            user2,
+                            Massage: "insert2",
+                          });
+                        }
                       }
-                    }
-                  );
-                }
-              );
+                    );
+                  }
+                ); 
+              }
             }
           }
         }
-      }
-    );
+      );
+    }
+    // ----------------------------------------------------------------------- 
   }catch(err){
     console.log("/Vote =================> "  , err)
   } 
@@ -3023,7 +3038,7 @@ app.post("/Checkevent", (req, res) => {
           eventdate_end = user[i].Date_vote;
 
           
-          console.log("/Checkevent ===== Date > " , user  );
+          // console.log("/Checkevent ===== Date > " , user  );
   
           const date1 = new Date(date_time_now); 
           const date2 = new Date(date_event);  
@@ -3032,7 +3047,7 @@ app.post("/Checkevent", (req, res) => {
             nac[i] = user[i].Event_name; 
             db.query(
               " UPDATE  event_info   SET  status_event = '1'  WHERE Id_event = " +
-                user[i].Id_event,
+                user[i].Id_event + " And status_event = 0 or status_event = 4",
               (err, user2) => {
                 if (err) {
                   console.log("err update status event = ", err);
@@ -3048,7 +3063,7 @@ app.post("/Checkevent", (req, res) => {
           else if(date1.getFullYear() == date2.getFullYear() && date1.getMonth() == date2.getMonth() && date1.getDate() == date2.getDate()){ 
                 db.query(
                   " UPDATE  event_info   SET  status_event = '4'  WHERE Id_event = " +
-                    user[i].Id_event,
+                    user[i].Id_event + " And status_event = 0 or status_event = 4 " ,
                   (err, user2) => {
                     if (err) {
                       console.log("err update status event = ", err);
@@ -3065,7 +3080,7 @@ app.post("/Checkevent", (req, res) => {
           }
         }
 
-        console.log("/Checkevent ===== Date > " , eventdate_end , " = " , end_event );
+        // console.log("/Checkevent ===== Date > " , eventdate_end , " = " , end_event );
 
 
         db.query(
@@ -3691,49 +3706,7 @@ app.post("/user_count", (req, res) => {
   }catch(err){
     console.log("/user_count ============> " , err)
   } 
-});
-
-
-
-const storage2 = multer.diskStorage({
-  //แก้
-  destination: path.join("../ux-project/src/", "File"),
-  filename: function (req, file, cb) {
-    // null as first argument means no error
-    const name123 = file.originalname;
-    console.log("Name 123 = " , name123);
-    cb(null, name123);
-    // console.log("asdasd", file, name123);
-  },
-});
-
-app.post("/file", (req, res) => {
-   let upload = multer({ storage: storage2 }).single("file");
-   try{
-    upload(req, res, function (err) {
-      // req.file contains information of uploaded file
-      // req.body contains information of text fields
-      if (!req.file) {
-        // console.log("res1");
-        return res.send("Please select an image to upload");
-      } else if (err instanceof multer.MulterError) {
-        // console.log("res2");
-        return res.send(err);
-      } else if (err) {
-        // console.log("res3");
-        return res.send(err);
-      } else {
-        classifiedsadd = req.file.originalname;
-        console.log("classifiedsadd = " , classifiedsadd)
-        res.send({ massage: classifiedsadd });
-         
-  
-      }
-    })
-  }catch(err){
-    console.log("/file ============> " , err)
-  } 
-})
+}); 
 
 app.post("/sendmail_End2", (req, res) => {
   const event_name = req.body.event_name;  
@@ -3771,6 +3744,44 @@ app.post("/sendmail_End2", (req, res) => {
     console.log("/sendmail_End2 ===============> " , errr)
   } 
 });
+ 
+
+
+  const storage2 = multer.diskStorage({
+    //แก้
+    destination: path.join("File"),
+    filename: function (req, file, cb) { 
+      const name123 = file.originalname;
+      console.log("Name 123 = " , name123);
+      cb(null, name123); 
+    },
+  });  
+
+  app.post("/file", (req, res) => {
+    let upload = multer({ storage: storage2 }).single("file");
+    try{
+     upload(req, res, function (err) {
+       // req.file contains information of uploaded file
+       // req.body contains information of text fields
+       if (!req.file) {
+         // console.log("res1");
+         return res.send("Please select an image to upload");
+       } else if (err instanceof multer.MulterError) {
+         // console.log("res2");
+         return res.send(err);
+       } else if (err) {
+         // console.log("res3");
+         return res.send(err);
+       } else {
+         classifiedsadd = req.file.originalname;
+         console.log("classifiedsadd = " , classifiedsadd)
+         res.send({ massage: classifiedsadd }); 
+       }
+     })
+   }catch(err){
+     console.log("/file ============> " , err)
+   } 
+ })
 
 
 app.post("/sendmail_End", (req, res) => {
@@ -3778,9 +3789,7 @@ app.post("/sendmail_End", (req, res) => {
   const Email = req.body.Email; 
   const data3 = req.body.data3;
   const file = req.body.file;
-  let massage = ('');
- 
-  // console.log(stringMessage);
+  let massage = ('');  
  try{
   const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -3801,7 +3810,7 @@ app.post("/sendmail_End", (req, res) => {
       attachments: [
         { 
             filename: file,
-            path: '../ux-project/src/file/'+file
+            path: './File/'+file
         }
     ],
   }; 
@@ -3843,6 +3852,57 @@ app.post("/count_check", (req, res) => {
   } 
 });
 
+
+app.post("/checkposman" , (req,res) => {
+  const id = req.body.id; 
+  const vote = req.body.vote; 
+  const vote2 = req.body.vote2; 
+  const hash = req.body.hash;  
+  const p_hash = req.body.p_hash; 
+  const date = req.body.date; 
+  const time = req.body.time;  
+
+  const buff = Buffer.from(vote, "base64");
+  var b = parseFloat(buff); 
+  // var b = buff.toString("utf-8"); 
+
+  console.log("    "); 
+  console.log("  ================  "); 
+
+  console.log("id = ", id , " = ", typeof id);
+  console.log("vote = ", vote, " = ", typeof vote); 
+  console.log("hash = ",hash , " = ", typeof hash); 
+  console.log("p_hash = ", p_hash, " = " ,typeof p_hash);
+  console.log("date = ", date, " = " ,typeof date);
+  console.log("time = ", time, " = ", typeof time); 
+  console.log("    ");  
+  console.log("  ================  "); 
+  
+  var aa = "0";
+  
+  console.log(vote2 , " = " , typeof vote2) 
+  console.log(b  , " = b " , typeof b ) 
+
+
+  bcrypt.compare(  
+    id+b+p_hash+date+time,
+    hash,
+    function (err, hash2) {
+      bcrypt.hash(
+        id+b+p_hash+date+time,
+        saltRounds,
+        function (err, hash1) {
+           res.send({
+            เปรียบเทียบ:hash2,
+            ผลhash:hash1,
+            hash:hash,
+            // b:b
+          })
+        })  
+    }) 
+     
+})
+
 app.post("/Check_hash", (req, res) => {
   const id = req.body.id; 
   const vote = req.body.vote; 
@@ -3860,9 +3920,7 @@ app.post("/Check_hash", (req, res) => {
     if(hash != null){ 
       if(check == true){
             if(p_hash == 0 ){
-            bcrypt.compare( 
-              // user[4].Par_id+user[4].Vote+user[4].P_hash+user[4].Date_vote+user[4].Time_vote,
-              // id+4+'$2b$10$tw1RwfcYPSxcrnDUWy4FZOPqK5qIRCMXV5tKduzIOP8uuMPzgeHl6'+'2023-1-5'+'22:21:17',
+            bcrypt.compare(  
               id+b+0+date+time,
               hash,
               function (err, hash1) {   
@@ -3887,9 +3945,7 @@ app.post("/Check_hash", (req, res) => {
             // ทดลองแก้ไข git
   
           } else {
-            bcrypt.compare( 
-              // user[4].Par_id+user[4].Vote+user[4].P_hash+user[4].Date_vote+user[4].Time_vote,
-              // id+4+'$2b$10$tw1RwfcYPSxcrnDUWy4FZOPqK5qIRCMXV5tKduzIOP8uuMPzgeHl6'+'2023-1-5'+'22:21:17',
+            bcrypt.compare(  
               id+b+p_hash+date+time,
               hash,
               function (err, hash1) {   
@@ -3934,7 +3990,17 @@ app.post("/Check_hash", (req, res) => {
           }
         );
       } else{
-        res.send({massage : "ok" , id : id});
+        db.query(
+          "Update participant set c_hash = ? Where Par_id = ? ",
+          [null , id],
+          (err, user) => {
+            if (err) { 
+              res.send({ err, massage: "dont show" });
+            } else {
+              res.send({massage : "ok" , id : id});
+            }
+          }
+        ); 
       }
     }
   }catch(err){

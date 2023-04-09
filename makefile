@@ -1,5 +1,6 @@
 #----config
-version :=1.0.1#version images same docker-compose
+# แก้วันที่ 9/04/66 หลังทำการอัป 1.0.5
+version :=1.0.5#version images same docker-compose
 user_docker :=tawanyummy#userId docker
 
 
