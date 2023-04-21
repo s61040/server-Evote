@@ -1,7 +1,7 @@
 version: "3.2"
 services:
   server:
-    image: evoting-server:1.0.5  #แก้ version
+    image: evoting-server:1.0.6  #แก้ version
     build:
       context: .
       dockerfile: Dockerfile

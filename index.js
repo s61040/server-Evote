@@ -3021,10 +3021,11 @@ app.post("/Checkevent", (req, res) => {
   var date_event = "";
   var eventdate_end = "";
   var end_event = "";  
-  const timecheck = "2022-12-7 03:20:00";
+  var aw23 = "";
+  const timecheck = "2023-04-22 01:58:00"; 
 
   try{
-    db.query("SELECT * FROM `event_info` where not status_event = 0 or not status_event = 4;", (err, user) => {
+    db.query("SELECT * FROM `event_info` where status_event = 0 or status_event = 4;", (err, user) => {
       if (user == null){
         res.send({ massage: "Don't Update" });
       }
@@ -3042,40 +3043,52 @@ app.post("/Checkevent", (req, res) => {
   
           const date1 = new Date(date_time_now); 
           const date2 = new Date(date_event);  
+
+          console.log("date2 = " , date2);
+          console.log("date1 = " , date1); 
+          
+          const date3 = date1.getDate()+" "+date1.getMonth()+1+" "+date1.getFullYear();
+           
   
+           
+          if(date1.getFullYear() == date2.getFullYear() && date1.getMonth() == date2.getMonth() && date1.getDate() == date2.getDate()){ 
+            console.log("อีเว้นปัจจุบัน == ", user[i].Id_event )
+             aw23 = user[i].Id_event ;
+                db.query(
+                  " UPDATE  event_info   SET  status_event = '4'  WHERE Id_event = "+
+                  aw23 + " And (status_event = 0 or status_event = 4) " ,
+                  (err, user2) => {
+                    if (err) {
+                      console.log("err update status event = ", err);
+                    }
+                    else {
+                      var a = 0;
+                      name_event = nac;
+                      console.log("Update Status = 4 = ", a); 
+                      a++;
+                    }
+                  }
+                ); 
+          }
           if (date1 > date2) { 
+            console.log("อีเว้นจบแล้ว == ", user[i].Id_event )
+            var a23 = user[i].Id_event ;
             nac[i] = user[i].Event_name; 
             db.query(
               " UPDATE  event_info   SET  status_event = '1'  WHERE Id_event = " +
-                user[i].Id_event + " And status_event = 0 or status_event = 4",
+              a23 + " And (status_event = 0 or status_event = 4)",
               (err, user2) => {
                 if (err) {
                   console.log("err update status event = ", err);
                 } else {
                   var a = 0;
                   name_event = nac;
-                  console.log("Update Status"); 
+                  console.log("Update Status = 1 = ", a23); 
                   a++;
                 }
               }
             );
           } 
-          else if(date1.getFullYear() == date2.getFullYear() && date1.getMonth() == date2.getMonth() && date1.getDate() == date2.getDate()){ 
-                db.query(
-                  " UPDATE  event_info   SET  status_event = '4'  WHERE Id_event = " +
-                    user[i].Id_event + " And status_event = 0 or status_event = 4 " ,
-                  (err, user2) => {
-                    if (err) {
-                      console.log("err update status event = ", err);
-                    } else {
-                      var a = 0;
-                      name_event = nac;
-                      console.log("Update Status"); 
-                      a++;
-                    }
-                  }
-                ); 
-          }
             else { 
           }
         }
